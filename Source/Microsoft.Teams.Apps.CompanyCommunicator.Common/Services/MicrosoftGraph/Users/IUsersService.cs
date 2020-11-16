@@ -31,8 +31,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// get user by id.
         /// </summary>
         /// <param name="userId">the user id.</param>
+        /// <param name="forceAppContext">Forces app context.</param>
         /// <returns>user data.</returns>
-        Task<User> GetUserAsync(string userId);
+        Task<User> GetUserAsync(string userId, bool forceAppContext = false);
 
         /// <summary>
         /// Gets all the users in the tenant. Doesn't include 'Guest' users.

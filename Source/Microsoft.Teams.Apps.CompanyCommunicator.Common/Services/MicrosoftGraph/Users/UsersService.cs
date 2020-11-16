@@ -117,11 +117,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         }
 
         /// <inheritdoc/>
-        public async Task<User> GetUserAsync(string userId)
+        public async Task<User> GetUserAsync(string userId, bool forceAppContext = false)
         {
-            var graphResult = await this.graphServiceClient
+            var request = this.graphServiceClient
                     .Users[userId]
-                    .Request()
+                    .Request();
+
+            // TODO: search of a better way, this shouldn't be necessary :S
+            if (forceAppContext)
+            {
+                request.Header(Common.Constants.PermissionTypeKey, GraphPermissionType.Application.ToString());
+            }
+
+            var graphResult = await request
                     .Select(user => new
                     {
                         user.Id,

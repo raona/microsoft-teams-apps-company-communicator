@@ -178,6 +178,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddScoped<Beta.IGraphServiceClient, Beta.GraphServiceClient>();
             services.AddScoped<IGraphServiceFactory, GraphServiceFactory>();
             services.AddScoped<IGroupsService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupsService());
+            services.AddScoped<IUsersService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetUsersService());
             services.AddScoped<IAppCatalogService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetAppCatalogService());
 
             // Add Application Insights telemetry.

@@ -4,9 +4,11 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
 
     /// <summary>
     /// Extensions for the repository of the user data stored in the table storage.
@@ -18,14 +20,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
         /// </summary>
         /// <param name="userDataRepository">The user data repository.</param>
         /// <param name="activity">Bot conversation update activity instance.</param>
+        /// <param name="graphUserService">instance of graph user service</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         public static async Task SaveUserDataAsync(
             this UserDataRepository userDataRepository,
-            IConversationUpdateActivity activity)
+            IConversationUpdateActivity activity,
+            IUsersService graphUserService)
         {
             var userDataEntity = UserDataRepositoryExtensions.ParseUserData(activity);
             if (userDataEntity != null)
             {
+                try
+                {
+                    var user = await graphUserService.GetUserAsync(userDataEntity.AadId, true);
+                    userDataEntity.Upn = user.UserPrincipalName;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+
                 await userDataRepository.InsertOrMergeAsync(userDataEntity);
             }
         }

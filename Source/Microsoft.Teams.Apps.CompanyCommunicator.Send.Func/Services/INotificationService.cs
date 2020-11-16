@@ -16,21 +16,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
         /// Checks if the send notification is throttled.
         /// </summary>
         /// <returns>true if the send notification is throttled, false otherwise.</returns>
-        public Task<bool> IsSendNotificationThrottled();
+        Task<bool> IsSendNotificationThrottled();
 
         /// <summary>
         /// Checks if the notification is pending.
         /// </summary>
         /// <param name="message">Send Queue message.</param>
         /// <returns>true if the notification is pending, false otherwise.</returns>
-        public Task<bool> IsPendingNotification(SendQueueMessageContent message);
+        Task<bool> IsPendingNotification(SendQueueMessageContent message);
 
         /// <summary>
         /// Set SendNotification Throttled.
         /// </summary>
         /// <param name="sendRetryDelayNumberOfSeconds">Send Retry delay.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public Task SetSendNotificationThrottled(double sendRetryDelayNumberOfSeconds);
+        Task SetSendNotificationThrottled(double sendRetryDelayNumberOfSeconds);
 
         /// <summary>
         /// Updates sent notification for the recipient.
@@ -45,7 +45,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
         /// to send the notification to the recipient.</param>
         /// <param name="errorMessage">The error message to store in the database.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public Task UpdateSentNotification(
+        Task UpdateSentNotification(
             string notificationId,
             string recipientId,
             int totalNumberOfSendThrottles,

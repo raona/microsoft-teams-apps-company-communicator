@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
 
     /// <summary>
@@ -23,6 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
         private readonly TeamDataRepository teamDataRepository;
         private readonly UserDataRepository userDataRepository;
+        private readonly IUsersService graphUserService;
         private readonly IAppSettingsService appSettingsService;
 
         /// <summary>
@@ -30,14 +32,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// </summary>
         /// <param name="teamDataRepository">Team data repository instance.</param>
         /// <param name="userDataRepository">User data repository instance.</param>
+        /// <param name="graphUserService">User data repository instance.</param>
         /// <param name="appSettingsService">App Settings service.</param>
         public TeamsDataCapture(
             TeamDataRepository teamDataRepository,
             UserDataRepository userDataRepository,
+            IUsersService graphUserService,
             IAppSettingsService appSettingsService)
         {
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
+            this.graphUserService = graphUserService ?? throw new ArgumentNullException(nameof(graphUserService));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
         }
 
@@ -61,7 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     await this.teamDataRepository.SaveTeamDataAsync(activity);
                     break;
                 case TeamsDataCapture.PersonalType:
-                    await this.userDataRepository.SaveUserDataAsync(activity);
+                    await this.userDataRepository.SaveUserDataAsync(activity, this.graphUserService);
                     break;
                 default: break;
             }

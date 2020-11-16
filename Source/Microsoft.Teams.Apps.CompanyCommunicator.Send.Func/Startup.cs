@@ -17,6 +17,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
@@ -87,6 +89,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             // Add repositories.
             builder.Services.AddSingleton<SendingNotificationDataRepository>();
             builder.Services.AddSingleton<GlobalSendingNotificationDataRepository>();
+            builder.Services.AddSingleton<SentNotificationDataRepository>();
+            builder.Services.AddSingleton<UserDataRepository>();
+            builder.Services.AddSingleton<TeamDataRepository>();
             builder.Services.AddSingleton<SentNotificationDataRepository>();
 
             // Add service bus message queues.
