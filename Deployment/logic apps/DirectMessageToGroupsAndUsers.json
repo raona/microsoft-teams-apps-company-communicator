@@ -1,0 +1,213 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Condition": {
+                "actions": {
+                    "Send_message": {
+                        "inputs": {
+                            "body": {
+                                "ContentData": "@{base64(concat('{','\n','    \"Email\": \"\",','\n','    \"ActivityToSend\":  ',triggerBody()?['cardContent'],',','\n','    \"SendAllUsers\": true,','\n','}'))}"
+                            },
+                            "host": {
+                                "connection": {
+                                    "name": "@parameters('$connections')['servicebus']['connectionId']"
+                                }
+                            },
+                            "method": "post",
+                            "path": "/@{encodeURIComponent(encodeURIComponent('company-communicator-notifier'))}/messages"
+                        },
+                        "runAfter": {},
+                        "type": "ApiConnection"
+                    }
+                },
+                "else": {
+                    "actions": {
+                        "Iterate_Groups_and_retrieve_members": {
+                            "actions": {
+                                "For_each": {
+                                    "actions": {
+                                        "Condition_2": {
+                                            "actions": {
+                                                "Append_to_array_variable_2": {
+                                                    "inputs": {
+                                                        "name": "usersToNotify",
+                                                        "value": "@item()?['userPrincipalName']"
+                                                    },
+                                                    "runAfter": {},
+                                                    "type": "AppendToArrayVariable"
+                                                }
+                                            },
+                                            "expression": {
+                                                "and": [
+                                                    {
+                                                        "not": {
+                                                            "equals": [
+                                                                "@item()?['userPrincipalName']",
+                                                                "@null"
+                                                            ]
+                                                        }
+                                                    }
+                                                ]
+                                            },
+                                            "runAfter": {},
+                                            "type": "If"
+                                        }
+                                    },
+                                    "foreach": "@body('HTTP')?['value']",
+                                    "runAfter": {
+                                        "HTTP": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "Foreach"
+                                },
+                                "HTTP": {
+                                    "inputs": {
+                                        "authentication": {
+                                            "audience": "https://graph.microsoft.com",
+                                            "authority": "https://login.windows.net",
+                                            "clientId": "<<CLIENT_ID>>",
+                                            "secret": "<<CLIENT_SECRET>>",
+                                            "tenant": "<<TENANT_ID>>",
+                                            "type": "ActiveDirectoryOAuth"
+                                        },
+                                        "method": "GET",
+                                        "uri": "https://graph.microsoft.com/v1.0/groups/@{item()}/members?$select=id,userPrincipalName"
+                                    },
+                                    "runAfter": {},
+                                    "type": "Http"
+                                }
+                            },
+                            "foreach": "@triggerBody()?['groups']",
+                            "runAfter": {},
+                            "type": "Foreach"
+                        },
+                        "Iterate_unique_users_and_send_to_service_bus_queue": {
+                            "actions": {
+                                "Send_message_2": {
+                                    "inputs": {
+                                        "body": {
+                                            "ContentData": "@{base64(concat('{','\n','    \"Email\": \"',items('Iterate_unique_users_and_send_to_service_bus_queue'),'\",','\n','    \"ActivityToSend\":  ',triggerBody()?['cardContent'],'\n','}'))}"
+                                        },
+                                        "host": {
+                                            "connection": {
+                                                "name": "@parameters('$connections')['servicebus']['connectionId']"
+                                            }
+                                        },
+                                        "method": "post",
+                                        "path": "/@{encodeURIComponent(encodeURIComponent('company-communicator-notifier'))}/messages",
+                                        "queries": {
+                                            "systemProperties": "None"
+                                        }
+                                    },
+                                    "runAfter": {},
+                                    "type": "ApiConnection"
+                                }
+                            },
+                            "foreach": "@intersection(variables('usersToNotify'),variables('usersToNotify'))",
+                            "runAfter": {
+                                "Iterate_Groups_and_retrieve_members": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Foreach"
+                        }
+                    }
+                },
+                "expression": {
+                    "and": [
+                        {
+                            "equals": [
+                                "@triggerBody()?['allUsers']",
+                                "@true"
+                            ]
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "Initialize_variable_with_default_value_of_triggerBody_users": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "If"
+            },
+            "Initialize_variable_with_default_value_of_triggerBody_users": {
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "usersToNotify",
+                            "type": "array",
+                            "value": "@triggerBody()?['users']"
+                        }
+                    ]
+                },
+                "runAfter": {},
+                "type": "InitializeVariable"
+            },
+            "Send_200_OK_Response": {
+                "inputs": {
+                    "statusCode": 200
+                },
+                "kind": "Http",
+                "runAfter": {
+                    "Condition": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Response"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "defaultValue": {},
+                "type": "Object"
+            }
+        },
+        "triggers": {
+            "manual": {
+                "inputs": {
+                    "schema": {
+                        "properties": {
+                            "allUsers": {
+                                "type": "boolean"
+                            },
+                            "cardContent": {
+                                "properties": {},
+                                "type": "object"
+                            },
+                            "groups": {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            "users": {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "kind": "Http",
+                "type": "Request"
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "value": {
+                "servicebus": {
+                    "connectionId": "/subscriptions/<<SUBSCRIPTION_ID>>/resourceGroups/<<RESOURCE_GROUP_NAME>>/providers/Microsoft.Web/connections/servicebus",
+                    "connectionName": "servicebus",
+                    "id": "/subscriptions/<<SUBSCRIPTION_ID>>/providers/Microsoft.Web/locations/westeurope/managedApis/servicebus"
+                }
+            }
+        }
+    }
+}
