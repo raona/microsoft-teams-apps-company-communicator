@@ -23,14 +23,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Extensions
             string email,
             ILogger log)
         {
+            var lowerCasedEmail = email.ToLower();
             try
             {
                 // TODO: avoid hardcoding this column name
                 var users = await userDataRepository.GetWithFilterAsync(
                     TableQuery.CombineFilters(
-                        TableQuery.GenerateFilterCondition("Email", QueryComparisons.Equal, email),
+                        TableQuery.GenerateFilterCondition("Email", QueryComparisons.Equal, lowerCasedEmail),
                         TableOperators.Or,
-                        TableQuery.GenerateFilterCondition("Upn", QueryComparisons.Equal, email)
+                        TableQuery.GenerateFilterCondition("Upn", QueryComparisons.Equal, lowerCasedEmail)
                     ),
                     UserDataTableNames.UserDataPartition
                 );

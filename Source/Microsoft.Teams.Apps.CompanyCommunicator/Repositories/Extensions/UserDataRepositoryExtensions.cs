@@ -33,7 +33,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 try
                 {
                     var user = await graphUserService.GetUserAsync(userDataEntity.AadId, true);
-                    userDataEntity.Upn = user.UserPrincipalName;
+                    userDataEntity.Upn = user.UserPrincipalName.ToLower();
                 }
                 catch (Exception ex)
                 {
