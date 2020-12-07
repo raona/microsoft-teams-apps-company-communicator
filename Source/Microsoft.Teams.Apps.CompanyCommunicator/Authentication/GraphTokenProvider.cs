@@ -46,19 +46,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 
         private async Task<string> GetAccessToken(string permissionType)
         {
-            string accessToken;
-            if (permissionType.Equals(GraphPermissionType.Application.ToString(), StringComparison.CurrentCultureIgnoreCase))
+            try
             {
-                // we use MSAL.NET to get a token to call the API for application
-                accessToken = await this.tokenAcquisition.GetAccessTokenForAppAsync(new string[] { Common.Constants.ScopeDefault });
-            }
-            else
-            {
-                // we use MSAL.NET to get a token to call the API On Behalf Of the current user
-                accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new string[] { Common.Constants.ScopeGroupReadAll, Common.Constants.ScopeAppCatalogReadAll });
-            }
+                string accessToken;
+                if (permissionType.Equals(GraphPermissionType.Application.ToString(), StringComparison.CurrentCultureIgnoreCase))
+                {
+                    // we use MSAL.NET to get a token to call the API for application
+                    accessToken = await this.tokenAcquisition.GetAccessTokenForAppAsync(new string[] { Common.Constants.ScopeDefault });
+                }
+                else
+                {
+                    // we use MSAL.NET to get a token to call the API On Behalf Of the current user
+                    accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new string[] { Common.Constants.ScopeGroupReadAll, Common.Constants.ScopeAppCatalogReadAll });
+                }
 
-            return accessToken;
+                return accessToken;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;<
+            }
         }
 
         private string ExtractPermissionType(HttpRequestHeaders headers)
